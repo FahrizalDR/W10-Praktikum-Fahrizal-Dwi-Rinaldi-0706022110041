@@ -80,7 +80,7 @@ namespace W10Praktikum
             try
             {
                 DataTable TanggalDanSKor = new DataTable();
-                sqlQuery = "select date_format(match_date, '%e %M %Y') as `Tanggal`, concat(goal_home, '-', goal_away) as `Skor` from `match` where team_home = '" + ComboBoxKiri.SelectedValue.ToString() + "' and team_away = '" + ComboBoxKanan.SelectedValue.ToString() + "'";
+                sqlQuery = "select date_format(match_date, '%e %M %Y') as 'Tanggal', concat(goal_home, '-', goal_away) as 'Skor' from `match` where team_home = '"+ComboBoxKiri.SelectedValue.ToString()+"' and team_away = '"+ComboBoxKanan.SelectedValue.ToString()+"'";
                 sqlCommand = new MySqlCommand(sqlQuery, sqlConnect);
                 sqlAdapter = new MySqlDataAdapter(sqlCommand);
                 sqlAdapter.Fill(TanggalDanSKor);
@@ -92,12 +92,15 @@ namespace W10Praktikum
                 MessageBox.Show("Pertandingan antara kedua tim tidak ada!");                
             }
 
-            //DataTable DetailMatch = new DataTable();
-            //sqlQuery = "";
-            //sqlCommand = new MySqlCommand(sqlQuery, sqlConnect);
-            //sqlAdapter = new MySqlDataAdapter(sqlCommand);
-            //sqlAdapter.Fill(DetailMatch);
-            //DgvDetailMatch.DataSource = DetailMatch;
+            DataTable DetailMatch = new DataTable();
+            sqlQuery = "select d1.`minute` as 'Minute', if(d1.team_id = m1.team_home, h.player_name, '') as 'Player Name 1', if(d1.`type`='CY', 'Yellow Card', if(d1.`type`='CR', 'Red Card', if(d1.`type`='GO', 'Goal', if(d1.`type`='GP', 'Goal Penalty', if(d1.`type`='GW', 'Own Goal', if(d1.`type`='PM', 'Penalty Miss', 0)))))) as 'Tipe 1', " +
+                "if (d2.team_id = m1.team_away, a.player_name, '') as 'Player Name 2', if (d1.`type`= 'CY', 'Yellow Card', if (d1.`type`= 'CR', 'Red Card', if (d1.`type`= 'GO', 'Goal', if (d1.`type`= 'GP', 'Goal Penalty', if (d1.`type`= 'GW', 'Own Goal', if (d1.`type`= 'PM', 'Penalty Miss', 0)))))) as 'Tipe 2' " +
+                "from dmatch d1, player h, `match` m1, dmatch d2, player a, `match` m2 " +
+                "where d1.match_id = m1.match_id and h.player_id = d1.player_id and d2.match_id = m2.match_id and a.player_id = d2.player_id and m1.team_home = '"+ComboBoxKiri.SelectedValue.ToString()+"' and m1.team_away = '"+ComboBoxKanan.SelectedValue.ToString()+"' group by d1.minute; ";
+            sqlCommand = new MySqlCommand(sqlQuery, sqlConnect);
+            sqlAdapter = new MySqlDataAdapter(sqlCommand);
+            sqlAdapter.Fill(DetailMatch);
+            DgvDetailMatch.DataSource = DetailMatch;
 
         }
     }
